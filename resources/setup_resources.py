@@ -2,9 +2,9 @@
 import boto3
 import json
 
-s3 = boto3.client('s3')
-iam = boto3.client('iam')
-sts = boto3.client('sts')
+s3 = boto3.client('s3', region_name=boto3.Session().region_name)
+iam = boto3.client('iam', region_name=boto3.Session().region_name)
+sts = boto3.client('sts', region_name=boto3.Session().region_name)
 
 ACCOUNT_ID = sts.get_caller_identity()['Account']
 BUCKET_NAME = f"genai-evaluation-migration-bucket-{ACCOUNT_ID}"
@@ -12,7 +12,10 @@ ROLE_NAME = "BedrockEvaluationRole"
 
 # Create S3 bucket
 try:
-    s3.create_bucket(Bucket=BUCKET_NAME)
+    s3.create_bucket(
+        Bucket=BUCKET_NAME,
+        CreateBucketConfiguration={'LocationConstraint': boto3.Session().region_name}
+    ) if boto3.Session().region_name != 'us-east-1' else s3.create_bucket(Bucket=BUCKET_NAME)
     print(f"✓ Created bucket: {BUCKET_NAME}")
 except s3.exceptions.BucketAlreadyOwnedByYou:
     print(f"✓ Bucket already exists: {BUCKET_NAME}")
