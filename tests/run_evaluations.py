@@ -11,6 +11,7 @@ ACCOUNT_ID = sts.get_caller_identity()['Account']
 BUCKET_NAME = f"genai-evaluation-migration-bucket-{ACCOUNT_ID}"
 ROLE_NAME = "BedrockEvaluationRole"
 S3_KEY = "eval-dataset.jsonl"
+REGION= boto3.Session().region_name
 
 role_arn = f"arn:aws:iam::{ACCOUNT_ID}:role/{ROLE_NAME}"
 eval_dataset_location = {"s3Uri": f"s3://{BUCKET_NAME}/{S3_KEY}"}
@@ -47,7 +48,7 @@ for profile_id in profile_ids:
         
         # Determine if it's an inference profile (starts with "us.") or a model ID
         if profile_id.startswith('us.'):
-            model_arn = f"arn:aws:bedrock:us-east-1:{ACCOUNT_ID}:inference-profile/{profile_id}"
+            model_arn = f"arn:aws:bedrock:{REGION}:{ACCOUNT_ID}:inference-profile/{profile_id}"
         else:
             model_arn = profile_id  # Use model ID directly
 
